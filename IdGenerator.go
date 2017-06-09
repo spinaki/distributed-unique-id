@@ -4,7 +4,6 @@ import (
         "time"
         "crypto/rand"
         "encoding/base64"
-        "strconv"
 )
 
 type Keys struct {
@@ -58,7 +57,7 @@ func GenerateIDList(settings *Settings) (*IDList, error) {
         if err != nil {
                 return nil, err
         }
-        idList := &IDList{ids, MachineId:snowFlake.machineID}
+        idList := &IDList{List:ids, MachineId:snowFlake.machineID}
         return idList, nil
 }
 

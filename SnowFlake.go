@@ -115,6 +115,7 @@ func (sf *SnowFlake) NextIDRange () (uint64, uint64, error) {
 
 // NextID generates a next unique ID.
 // After the SnowFlake time overflows, NextID returns an error.
+// ONLY USED in Testing ??
 func (sf *SnowFlake) NextID() (uint64, error) {
         const maskSequence = uint16(1<<BitLenSequence - 1)
 

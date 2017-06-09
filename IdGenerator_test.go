@@ -7,7 +7,6 @@ import (
         "time"
         "github.com/stretchr/testify/assert"
         "strings"
-        "strconv"
 )
 
 func TestIDRange(t *testing.T) {
@@ -47,23 +46,23 @@ func TestIDList(t *testing.T) {
         assert.Equal(t, 256, len(idList.List), "Length of ID List should be 256")
         assert.Equal(t, 256, cap(idList.List), "Capacity of ID List should be 256")
         assert.Condition(t, func() bool {
-                val,_ := strconv.ParseUint(idList.List[0],10, 64)
+                val := idList.List[0]
                 return val > uint64(150549601139639296)},
                 "LowerBound should be greater than previous lowerbound")
         assert.Condition(t, func() bool {
-                val,_ := strconv.ParseUint(idList.List[0], 10,64)
+                val := idList.List[0]
                 return val > uint64(150549601139639551)},
                 "LowerBound should be greater than previous upperbound")
         assert.Condition(t, func() bool {
-                val,_ :=  strconv.ParseUint(idList.List[255],10,64)
+                val :=  idList.List[255]
                 return val > uint64(150549601139639551)},
                 "Upperbound should be greater than previous upperbound")
         assert.Condition(t, func() bool {
-                val,_ := strconv.ParseUint(idList.List[0],10,64)
+                val := idList.List[0]
                 return val > uint64(150549601139639296)},
                 "Upperbound should be greater than previous lowerbound")
-        lastVal, _ := strconv.ParseUint(idList.List[255],10,64)
-        firstVal, _ := strconv.ParseUint(idList.List[0],10,64)
+        lastVal := idList.List[255]
+        firstVal := idList.List[0]
         assert.Equal(t, uint64(255), (lastVal - firstVal), "Upper and Lower Bound Difference Mismatch")
         fmt.Println(string(s))
 }
