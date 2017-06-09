@@ -52,7 +52,7 @@ func TestSnowFlakeOnce(t *testing.T) {
         }
 
         actualTime := parts["time"]
-        if actualTime < sleepTime || actualTime > sleepTime+1 {
+        if actualTime < sleepTime  + 1 {
                 t.Errorf("unexpected time: %d", actualTime)
         }
 
@@ -79,10 +79,27 @@ func TestSnowFlakeList(t *testing.T) {
         if err != nil {
                 t.Fatal("id list not generated")
         }
+        lower := idList[0]
+        upper := idList[255]
+        a := decompose(lower)
+        fmt.Println(a)
         assert.Equal(t, 256, len(idList), "Length of ID List should be 256")
         assert.Equal(t, 256, cap(idList), "Capacity of ID List should be 256")
-        assert.Equal(t, uint64(82944), idList[0], "idList start should be 82944")
-        assert.Equal(t, uint64(83199), idList[255], "idList start should be 83199")
+        //assert.Equal(t, uint64(82944), idList[0], "idList start should be 82944")
+        //assert.Equal(t, uint64(83199), idList[255], "idList start should be 83199")
+        if (a["time"] == 0) {
+                fmt.Println("Running asserts for 0")
+                assert.Equal(t, uint64(82176), lower, "LowerBound mismatch")
+                assert.Equal(t, uint64(82431), upper, "UpperBound mismatch")
+        } else if (a["time"] == 1) {
+                fmt.Println("Running asserts for 1")
+                assert.Equal(t, uint64(16859392), lower, "LowerBound mismatch")
+                assert.Equal(t, uint64(16859647), upper, "UpperBound mismatch")
+        } else if (a["time"] == 2) {
+                fmt.Println("Running asserts for 2")
+                assert.Equal(t, uint64(33636608), lower, "LowerBound mismatch")
+                assert.Equal(t, uint64(33636863), upper, "UpperBound mismatch")
+        }
 }
 
 func TestSnowFlakeRange(t *testing.T) {
@@ -90,8 +107,26 @@ func TestSnowFlakeRange(t *testing.T) {
         if err != nil {
                 t.Fatal("id bounds not generated")
         }
-        assert.Equal(t, uint64(82944), lower, "LowerBound mismatch")
-        assert.Equal(t, uint64(83199), upper, "UpperBound mismatch")
+        fmt.Println(lower, upper)
+        a := decompose(lower)
+        b := decompose(upper)
+        fmt.Println(a)
+        assert.Equal(t, uint64(0), a["sequence"], "Sequence LowerBound mismatch")
+        assert.Equal(t, uint64(255), b["sequence"], "Sequence LowerBound mismatch")
+        if (a["time"] == 0) {
+                fmt.Println("Running asserts for 0")
+                assert.Equal(t, uint64(82176), lower, "LowerBound mismatch")
+                assert.Equal(t, uint64(82431), upper, "UpperBound mismatch")
+        } else if (a["time"] == 1) {
+                fmt.Println("Running asserts for 1")
+                assert.Equal(t, uint64(16859392), lower, "LowerBound mismatch")
+                assert.Equal(t, uint64(16859647), upper, "UpperBound mismatch")
+        } else if (a["time"] == 2) {
+                fmt.Println("Running asserts for 2")
+                assert.Equal(t, uint64(33636608), lower, "LowerBound mismatch")
+                assert.Equal(t, uint64(33636863), upper, "UpperBound mismatch")
+        }
+
         assert.Equal(t, uint64(255), (upper - lower), "Upper and Lower Bound Difference Mismatch")
 }
 
