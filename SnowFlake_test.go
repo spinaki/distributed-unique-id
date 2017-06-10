@@ -8,32 +8,29 @@ import (
         "github.com/stretchr/testify/assert"
 )
 
-var sf *SnowFlake
-
 var startTime int64
 var machineID uint64
 
-func init() {
+func getSnowFlake() *SnowFlake {
         var settings Settings
-        //settings.StartTime = time.Now() // startTime is the current time
-        settings.StartTime = time.Date(2014, 1, 1, 0, 0, 0, 0, time.UTC) // starttime is the Jan 01, 2014
+        settings.StartTime = time.Now() // startTime is the current time
+        //settings.StartTime = time.Date(2014, 1, 1, 0, 0, 0, 0, time.UTC) // starttime is the Jan 01, 2014
         settings.MachineID = mockMachineId
-
-        sf = NewSnowFlake(settings)
+        //var sf *SnowFlake
+        sf := NewSnowFlake(settings)
         if sf == nil {
                 panic("SnowFlake not created")
         }
-
         startTime = toSnowFlakeTime(settings.StartTime)
-
         //ip, _ := lower16BitPrivateIP()
         machineID = uint64(321)
+        return sf
 }
 
 func mockMachineId()(uint16, error) {
         return 321, nil
 }
-func nextID(t *testing.T) uint64 {
+func nextID(t *testing.T, sf *SnowFlake) uint64 {
         id, err := sf.NextID()
         if err != nil {
                 t.Fatal("id not generated")
@@ -42,11 +39,12 @@ func nextID(t *testing.T) uint64 {
 }
 
 func TestSnowFlakeOnce(t *testing.T) {
+        sf := getSnowFlake()
         sleepTime := uint64(5)
         fmt.Println(sleepTime)
         time.Sleep(time.Duration(sleepTime) * 10 * time.Millisecond)
 
-        id := nextID(t)
+        id := nextID(t, sf)
 
         parts := decompose(id)
 
@@ -56,8 +54,8 @@ func TestSnowFlakeOnce(t *testing.T) {
         }
 
         actualTime := parts["time"]
-        if actualTime < sleepTime  + 1 {
-                t.Errorf("unexpected time: %d", actualTime)
+        if actualTime < sleepTime  {
+                t.Errorf("actualTime shold be greater than sleepTime: %d, %d", actualTime, sleepTime)
         }
 
         actualSequence := parts["sequence"]
@@ -75,12 +73,14 @@ func TestSnowFlakeOnce(t *testing.T) {
 }
 
 func TestSnowFlakeConsecutive(t *testing.T) {
+        sf := getSnowFlake()
         id1, _ := sf.NextID()
         id2, _ := sf.NextID()
         assert.Equal(t, true, (id1 < id2), "ID Order Mismatch")
 }
 
 func TestSnowFlakeRangeConsecutive(t *testing.T) {
+        sf := getSnowFlake()
         lower1, upper1, err := sf.NextIDRange()
         if err != nil {
                 t.Fatal("id bounds not generated")
@@ -97,6 +97,7 @@ func currentTime() int64 {
 }
 
 func TestSnowFlakeList(t *testing.T) {
+        sf := getSnowFlake()
         idList, err := sf.NextIDs()
         if err != nil {
                 t.Fatal("id list not generated")
@@ -125,6 +126,7 @@ func TestSnowFlakeList(t *testing.T) {
 }
 
 func TestSnowFlakeRange(t *testing.T) {
+        sf := getSnowFlake()
         lower, upper, err := sf.NextIDRange()
         if err != nil {
                 t.Fatal("id bounds not generated")
@@ -153,6 +155,7 @@ func TestSnowFlakeRange(t *testing.T) {
 }
 
 func TestSnowFlakeFor10Sec(t *testing.T) {
+        sf := getSnowFlake()
         var numID uint32
         var lastID uint64
         var maxSequence uint64
@@ -160,7 +163,7 @@ func TestSnowFlakeFor10Sec(t *testing.T) {
         initial := currentTime()
         current := initial
         for current - initial < 3 {
-                id := nextID(t)
+                id := nextID(t, sf)
 
                 parts := decompose(id)
                 numID++
@@ -203,6 +206,7 @@ func TestSnowFlakeFor10Sec(t *testing.T) {
 }
 
 func TestSnowFlakeInParallel(t *testing.T) {
+        sf := getSnowFlake()
         numCPU := runtime.NumCPU()
         runtime.GOMAXPROCS(numCPU)
         fmt.Println("number of cpu:", numCPU)
@@ -212,7 +216,7 @@ func TestSnowFlakeInParallel(t *testing.T) {
         const numID = 10000
         generate := func() {
                 for i := 0; i < numID; i++ {
-                        consumer <- nextID(t)
+                        consumer <- nextID(t, sf)
                 }
         }
 
@@ -257,16 +261,17 @@ func TestNilSnowFlake(t *testing.T) {
         }
 }
 
-func pseudoSleep(period time.Duration) {
+func pseudoSleep(period time.Duration, sf *SnowFlake) {
         sf.startTime -= int64(period) / snowFlakeTimeUnitScaleFactor
 }
 
 func TestNextIDError(t *testing.T) {
+        sf := getSnowFlake()
         year := time.Duration(365*24) * time.Hour
-        pseudoSleep(time.Duration(174) * year)
-        nextID(t)
+        pseudoSleep(time.Duration(174) * year, sf)
+        nextID(t, sf)
 
-        pseudoSleep(time.Duration(1) * year)
+        pseudoSleep(time.Duration(1) * year, sf)
         _, err := sf.NextID()
         if err == nil {
                 t.Errorf("time is not over")

@@ -7,6 +7,7 @@ import (
         "io/ioutil"
         "net/http"
         "os"
+        "log"
 )
 // These constants are the bit lengths of SnowFlake ID parts.
 const (
@@ -96,24 +97,6 @@ func (sf *SnowFlake) NextIDs() ([]uint64, error) {
         return idList, nil
 }
 
-// returns the lowerMost and upperMost values in the unique ID range
-//func (sf *SnowFlake) NextIDRange () (uint64, uint64, error) {
-//        sf.mutex.Lock()
-//        defer sf.mutex.Unlock()
-//        sf.elapsedTime = currentElapsedTime(sf.startTime)
-//        sf.sequence = 0
-//        lower, err := sf.toID()
-//        if (err != nil) {
-//                return 0, 0, err
-//        }
-//        sf.sequence = uint16(1 << BitLenSequence - 1)
-//        upper, err := sf.toID()
-//        if (err != nil) {
-//                return 0, 0, err
-//        }
-//        return lower, upper, nil
-//}
-
 // NextID generates a next unique ID.
 // After the SnowFlake time overflows, NextID returns an error.
 // ONLY USED in Testing ??
@@ -136,7 +119,7 @@ func (sf *SnowFlake) validateTime() {
                 // this will be executed if the elapsedTime is not set correctly to current time
                 sf.recentTime = current
                 sf.sequence = 0
-        } else {
+        } else if (sf.recentTime == current) {
                 const maskSequence = uint16(1 << BitLenSequence - 1)
                 sf.sequence = (sf.sequence + 1) & maskSequence
                 if sf.sequence == 0  {
@@ -144,6 +127,8 @@ func (sf *SnowFlake) validateTime() {
                         overtime := sf.recentTime - current
                         time.Sleep(sleepTime((overtime)))
                 }
+        } else {
+                log.Fatal("recent time can never be greater than current time")
         }
 }
 func (sf *SnowFlake) NextIDRange () (uint64, uint64, error) {
