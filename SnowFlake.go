@@ -1,4 +1,4 @@
-package uniqueidgenerator
+package main
 import (
         "errors"
         "net"
