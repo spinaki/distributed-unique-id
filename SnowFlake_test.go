@@ -15,8 +15,8 @@ var machineID uint64
 
 func init() {
         var settings Settings
-        settings.StartTime = time.Now() // startTime is the current time
-        //st.StartTime = time.Date(2014, 1, 1, 0, 0, 0, 0, time.UTC) // starttime is the Jan 01, 2014
+        //settings.StartTime = time.Now() // startTime is the current time
+        settings.StartTime = time.Date(2014, 1, 1, 0, 0, 0, 0, time.UTC) // starttime is the Jan 01, 2014
         settings.MachineID = mockMachineId
 
         sf = NewSnowFlake(settings)
@@ -75,23 +75,21 @@ func TestSnowFlakeOnce(t *testing.T) {
 }
 
 func TestSnowFlakeConsecutive(t *testing.T) {
-        fmt.Println(sf.sequence)
-        id, _ := sf.NextID()
-        fmt.Println(decompose(id))
-        id, _ = sf.NextID()
-        fmt.Println(decompose(id))
+        id1, _ := sf.NextID()
+        id2, _ := sf.NextID()
+        assert.Equal(t, true, (id1 < id2), "ID Order Mismatch")
 }
 
-func TestSnowFlakeRangeCons(t *testing.T) {
-        lower, upper, err := sf.NextIDRange1()
+func TestSnowFlakeRangeConsecutive(t *testing.T) {
+        lower1, upper1, err := sf.NextIDRange()
         if err != nil {
                 t.Fatal("id bounds not generated")
         }
-        fmt.Println(lower, upper)
-        sleepTime := uint64(1)
-        time.Sleep(time.Duration(sleepTime) * 10 * time.Millisecond)
-        lower, upper, err = sf.NextIDRange1()
-        fmt.Println(lower, upper)
+        lower2, upper2, err := sf.NextIDRange()
+        assert.Equal(t, true, (lower1 < upper1), "Lower Upper mismatch")
+        assert.Equal(t, true, (lower2 < upper2), "Lower Upper mismatch")
+        assert.Equal(t, true, (lower1 < lower2), "Lower Lower mismatch")
+        assert.Equal(t, true, (upper1 < upper2), "Upper Upper mismatch")
 }
 
 func currentTime() int64 {
