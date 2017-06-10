@@ -14,21 +14,25 @@ var startTime int64
 var machineID uint64
 
 func init() {
-        var st Settings
-        st.StartTime = time.Now() // startTime is the current time
+        var settings Settings
+        settings.StartTime = time.Now() // startTime is the current time
         //st.StartTime = time.Date(2014, 1, 1, 0, 0, 0, 0, time.UTC) // starttime is the Jan 01, 2014
+        settings.MachineID = mockMachineId
 
-        sf = NewSnowFlake(st)
+        sf = NewSnowFlake(settings)
         if sf == nil {
                 panic("SnowFlake not created")
         }
 
-        startTime = toSnowFlakeTime(st.StartTime)
+        startTime = toSnowFlakeTime(settings.StartTime)
 
-        ip, _ := lower16BitPrivateIP()
-        machineID = uint64(ip)
+        //ip, _ := lower16BitPrivateIP()
+        machineID = uint64(321)
 }
 
+func mockMachineId()(uint16, error) {
+        return 321, nil
+}
 func nextID(t *testing.T) uint64 {
         id, err := sf.NextID()
         if err != nil {
