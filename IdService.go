@@ -8,11 +8,11 @@ import (
         "strconv"
 )
 
-var snowflakeSettings *Settings
+var idGeneratorSettings *Settings
 func main() {
         // build snowflake using the IdGenerator API
-        snowflakeSettings = &Settings{}
-        snowflakeSettings.StartTime = time.Date(2016, 1, 1, 0, 0, 0, 0, time.UTC)
+        idGeneratorSettings = &Settings{}
+        idGeneratorSettings.StartTime = time.Date(2016, 1, 1, 0, 0, 0, 0, time.UTC)
 
         // build
         gin.SetMode(gin.ReleaseMode)
@@ -41,8 +41,9 @@ func statusHandler(c *gin.Context) {
 
 func stringIdsHandler(c *gin.Context) {
         // num of ids and length of ids
-        num := c.DefaultQuery("num", "10")
-        len := c.DefaultQuery("len", "32")
+        num := c.DefaultQuery("num", "10") // default num of ids = 10
+        len := c.DefaultQuery("len", "32") // number of bytes used to generate random id = 32
+        // NOTE: the char size of base64 encoded string will be different from the num of bytes used.
         l, _ := strconv.Atoi(len)
         n, _ := strconv.Atoi(num)
         ids := GenerateRandomStringId(l, n)
@@ -51,7 +52,7 @@ func stringIdsHandler(c *gin.Context) {
 }
 
 func longIdsHandler(c *gin.Context) {
-        idList, err := GenerateIDList(snowflakeSettings)
+        idList, err := GenerateIDList(idGeneratorSettings)
         if err != nil {
                 c.JSON(http.StatusInternalServerError, gin.H{"result": "Failed to generate unique integer id list"})
                 return
@@ -60,7 +61,7 @@ func longIdsHandler(c *gin.Context) {
 }
 
 func longIdRangeHandler(c *gin.Context) {
-        idRange, err := GenerateIDRange(snowflakeSettings)
+        idRange, err := GenerateIDRange(idGeneratorSettings)
         if err != nil {
                 c.JSON(http.StatusInternalServerError, gin.H{"result": "Failed to generate unique integer id range"})
                 return
