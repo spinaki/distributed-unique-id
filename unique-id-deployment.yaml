@@ -11,13 +11,11 @@ spec:
     spec:
       containers:
       - name: unique-id
-        image: exifguy/distributed-uniqueid:latest
+        image: exifguy/uniqueid:v1
         env:
-        - name: DEBUG
-          value: "false"
         - name: UNIQUE_ID_POD_IP
           valueFrom:
             fieldRef:
               fieldPath: status.podIP
         ports:
-        - containerPort: 8004
+        - containerPort: 8080
