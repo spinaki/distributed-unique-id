@@ -6,13 +6,6 @@ import (
         "encoding/base64"
 )
 
-type Keys struct {
-        AppId string `json:"app_id"`
-        ClientKey string `json:"client_key"`
-        MasterKey string `json:"master_key"`
-        RestAPIKey string `json:"rest_api_key"`
-}
-
 type IDRange struct {
         LowerBound uint64 `json:"lower_bound"`
         UpperBound uint64 `json:"upper_bound"`
@@ -22,6 +15,10 @@ type IDRange struct {
 type IDList struct {
         List []uint64 `json:"id_list"`
         MachineId uint16 `json:"machine_id"`
+}
+
+type StringIDList struct {
+        List []string `json:"id_list"`
 }
 
 const KeyLengthInBytes = 32
@@ -61,14 +58,15 @@ func GenerateIDList(settings *Settings) (*IDList, error) {
         return idList, nil
 }
 
-func GenerateKeys() *Keys {
-        keys := &Keys{
-                AppId: generateRandomString(KeyLengthInBytes),
-                ClientKey:generateRandomString(KeyLengthInBytes),
-                RestAPIKey: generateRandomString(KeyLengthInBytes),
-                MasterKey: generateRandomString(KeyLengthInBytes),
+// returns a set of random string ids
+func GenerateRandomStringId(keyLength int, numIds int) []string {
+        ids := make([]string, 0, numIds)
+        i := 0
+        for; i < numIds; {
+                ids = append(ids, generateRandomString(keyLength))
+                i++
         }
-        return keys
+        return ids
 }
 
 // source https://elithrar.github.io/article/generating-secure-random-numbers-crypto-rand/
