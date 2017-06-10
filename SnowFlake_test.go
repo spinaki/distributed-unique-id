@@ -70,6 +70,26 @@ func TestSnowFlakeOnce(t *testing.T) {
         fmt.Println("decompose:", parts)
 }
 
+func TestSnowFlakeConsecutive(t *testing.T) {
+        fmt.Println(sf.sequence)
+        id, _ := sf.NextID()
+        fmt.Println(decompose(id))
+        id, _ = sf.NextID()
+        fmt.Println(decompose(id))
+}
+
+func TestSnowFlakeRangeCons(t *testing.T) {
+        lower, upper, err := sf.NextIDRange1()
+        if err != nil {
+                t.Fatal("id bounds not generated")
+        }
+        fmt.Println(lower, upper)
+        sleepTime := uint64(1)
+        time.Sleep(time.Duration(sleepTime) * 10 * time.Millisecond)
+        lower, upper, err = sf.NextIDRange1()
+        fmt.Println(lower, upper)
+}
+
 func currentTime() int64 {
         return toSnowFlakeTime(time.Now())
 }

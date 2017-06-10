@@ -7,6 +7,7 @@ import (
         "io/ioutil"
         "net/http"
         "os"
+        "fmt"
 )
 // These constants are the bit lengths of SnowFlake ID parts.
 const (
@@ -52,8 +53,8 @@ type SnowFlake struct {
 func NewSnowFlake(st Settings) *SnowFlake {
         sf := new(SnowFlake)
         sf.mutex = new(sync.Mutex)
-        sf.sequence = uint16(1<<BitLenSequence - 1)
-
+        // why is it set to max value ?
+        sf.sequence = uint16( 1 << BitLenSequence - 1)
         if st.StartTime.After(time.Now()) {
                 return nil
         }
@@ -117,14 +118,16 @@ func (sf *SnowFlake) NextIDRange () (uint64, uint64, error) {
 // After the SnowFlake time overflows, NextID returns an error.
 // ONLY USED in Testing ??
 func (sf *SnowFlake) NextID() (uint64, error) {
-        const maskSequence = uint16(1<<BitLenSequence - 1)
+        const maskSequence = uint16(1 << BitLenSequence - 1)
 
         sf.mutex.Lock()
         defer sf.mutex.Unlock()
-
         current := currentElapsedTime(sf.startTime)
+        //fmt.Println(sf.elapsedTime, current)
         if sf.elapsedTime < current {
+                // this is only executed the first time
                 // this will be executed if the elapsedTime is not set correctly to current time
+                fmt.Println("elapsedTime less than current")
                 sf.elapsedTime = current
                 sf.sequence = 0
         } else { // sf.elapsedTime >= current
@@ -132,11 +135,45 @@ func (sf *SnowFlake) NextID() (uint64, error) {
                 if sf.sequence == 0 {
                         sf.elapsedTime++
                         overtime := sf.elapsedTime - current
+                        fmt.Println("SLEEP FOR DURATION: ", sleepTime(overtime))
                         time.Sleep(sleepTime((overtime)))
                 }
         }
-
         return sf.toID()
+}
+
+func (sf *SnowFlake) NextIDRange1 () (uint64, uint64, error) {
+        sf.mutex.Lock()
+        defer sf.mutex.Unlock()
+        const maskSequence = uint16(1 << BitLenSequence - 1)
+        current := currentElapsedTime(sf.startTime)
+        fmt.Println(sf.elapsedTime, current)
+        if sf.elapsedTime < current {
+                // this is only executed the first time
+                // this will be executed if the elapsedTime is not set correctly to current time
+                fmt.Println("elapsedTime less than current")
+                sf.elapsedTime = current
+                sf.sequence = 0
+        } else {
+                sf.sequence = (sf.sequence + 1) & maskSequence
+                if sf.sequence == 0  {
+                        sf.elapsedTime++
+                        overtime := sf.elapsedTime - current
+                        fmt.Println("SLEEP FOR DURATION: ", sleepTime(overtime))
+                        time.Sleep(sleepTime((overtime)))
+                }
+        }
+        lower, err := sf.toID()
+        if (err != nil) {
+                return 0, 0, err
+        }
+        sf.sequence = uint16(1 << BitLenSequence - 1)
+        upper, err := sf.toID()
+        if (err != nil) {
+                return 0, 0, err
+        }
+        return lower, upper, nil
+
 }
 
 const snowFlakeTimeUnitScaleFactor = 1e7 // nsec, i.e. 10 msec convert unit of nano-sec to 10 msec.
