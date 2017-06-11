@@ -37,6 +37,12 @@ curl localhost:8080/longids // invoke the api endpoint from another cli
 
 #### Docker: Use Prebuilt Image
 Find the image at [DockerHub](https://hub.docker.com/r/exifguy/uniqueid/)
+```
+docker pull exifguy/uniqueid:v1
+docker run --name puid -p 8080:8080 -d exifguy/uniqueid:v1
+curl localhost:8080/status
+curl localhost:8080/longids
+```
 #### Howto Create Your Own  Image
 * Create the binary which whill be used by the docker image. Run the following from the main directory.
 Make sure the gopath is set correctly.
