@@ -63,8 +63,8 @@ docker push exifguy/uniqueid:v1
 #### Deploy on Kubernetes (either AWS or GCP)
 * By deploying on  Kubernetes you can achieve high availability -- since if a node
 goes down the system will restart another one.
-* Use the  [Deployment YML File](./unique-id-deploment.yaml) to create a new deployment on kubernetes.
-* Make sure about the pod-ip environment variable is added in the [yml file](./unique-id-deploment.yaml). 
+* Use the  [Deployment YML File](./unique-id-deployment.yaml) to create a new deployment on kubernetes.
+* Make sure about the pod-ip environment variable is added in the [yml file](./unique-id-deployment.yaml). 
 The library running in the pod will query this variable to find the ip address required for unique id.
 #### Details on the long Unique Id Format
 * From MSB to LSB: 39 bit Time, 16 bit machine ID, 8 bit sequence.
