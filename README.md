@@ -8,6 +8,15 @@ since in most databases records are already sorted by the keys (in this case the
 The goal of this project was to create a highly available, low latency system to generate 64 bit long globally unique ids.
 I adapted Twitter's Snowflake to build a fast id generator -- where ids are sorted by time.
 I used Kubernetes and Docker to build a highly available system -- so that it can be deployed in the cloud very quickly.
+## Take it for a quick spin
+Find the image at [DockerHub](https://hub.docker.com/r/exifguy/uniqueid/). Pull the image and launch the the container.
+Launch the ID service without writing a single line of code :).
+```
+docker pull exifguy/uniqueid:v1
+docker run --name puid -p 8080:8080 -d exifguy/uniqueid:v1
+curl localhost:8080/status
+curl localhost:8080/longids
+```
 
 #### What can you do with this library
 * You can generate a sorted list of  64 bit unique ids.
@@ -35,14 +44,6 @@ curl localhost:8080/longids // invoke the api endpoint from another cli
 <img src="unique-id-time.png?raw=true" width="450"/>
 </p>
 
-#### Docker: Use Prebuilt Image
-Find the image at [DockerHub](https://hub.docker.com/r/exifguy/uniqueid/)
-```
-docker pull exifguy/uniqueid:v1
-docker run --name puid -p 8080:8080 -d exifguy/uniqueid:v1
-curl localhost:8080/status
-curl localhost:8080/longids
-```
 #### Howto Create Your Own  Image
 * Create the binary which whill be used by the docker image. Run the following from the main directory.
 Make sure the gopath is set correctly.
