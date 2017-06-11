@@ -8,7 +8,7 @@ since in most databases records are already sorted by the keys (in this case the
 The goal of this project was to create a highly available, low latency system to generate 64 bit long globally unique ids.
 I adapted Twitter's Snowflake to build a fast id generator -- where ids are sorted by time.
 I used Kubernetes and Docker to build a highly available system -- so that it can be deployed in the cloud very quickly.
-## Take it for a quick spin
+## Try It Out Quickly
 Find the image at [DockerHub](https://hub.docker.com/r/exifguy/uniqueid/). Pull the image and launch the the container.
 Launch the ID service without writing a single line of code :).
 ```
